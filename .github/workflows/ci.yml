@@ -1,0 +1,35 @@
+name: FocusFlow CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build-and-test:
+    name: Lint, Typecheck, and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run Linter
+        run: bun run lint
+
+      - name: Verify Build
+        # Kita menggunakan environment variable dummy agar build Next.js bisa berjalan tanpa error koneksi database
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: "https://dummy.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-key"
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: "dummy-id.apps.googleusercontent.com"
+        run: bun run build

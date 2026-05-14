@@ -1,26 +1,193 @@
 @import "tailwindcss";
 
+/* =============================================
+   Design System: FocusFlow
+   Clean design with Light + Dark mode
+   Palette: #BF1A1A, #FF6C0C, #FFE08F, #060771
+   ============================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand palette */
+  --brand-red: #BF1A1A;
+  --brand-orange: #FF6C0C;
+  --brand-yellow: #FFE08F;
+  --brand-navy: #060771;
+
+  /* Light mode base */
+  --background: #FAFAFA;
+  --background-secondary: #FFFFFF;
+  --background-tertiary: #F3F4F6;
+  --foreground: #111827;
+  --foreground-muted: #6B7280;
+  --foreground-subtle: #9CA3AF;
+
+  /* Accent */
+  --accent: #060771;
+  --accent-hover: #0A0B9E;
+
+  /* Category colors */
+  --color-kuis: #BF1A1A;
+  --color-tugas: #060771;
+  --color-competition: #FF6C0C;
+  --color-career: #0D9488;
+
+  /* Priority colors */
+  --color-high: #BF1A1A;
+  --color-medium: #FF6C0C;
+  --color-low: #0D9488;
+
+  /* Status colors */
+  --color-todo: #9CA3AF;
+  --color-progress: #FF6C0C;
+  --color-done: #059669;
+
+  /* Borders & Shadows */
+  --border: #E5E7EB;
+  --border-hover: #D1D5DB;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark {
+  --background: #0F1117;
+  --background-secondary: #1A1D2B;
+  --background-tertiary: #242838;
+  --foreground: #F1F2F6;
+  --foreground-muted: #9BA1B7;
+  --foreground-subtle: #5C6280;
+
+  --accent: #7B8CFF;
+  --accent-hover: #9BA8FF;
+
+  --border: #2D3348;
+  --border-hover: #3D4460;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --color-kuis: #EF6B6B;
+  --color-tugas: #7B8CFF;
+  --color-competition: #FF9E5C;
+  --color-career: #5EEAD4;
+
+  --color-high: #EF6B6B;
+  --color-medium: #FF9E5C;
+  --color-low: #5EEAD4;
+
+  --color-todo: #5C6280;
+  --color-progress: #FF9E5C;
+  --color-done: #34D399;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-tertiary: var(--background-tertiary);
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-brand-red: var(--brand-red);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-navy: var(--brand-navy);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =============================================
+   Base Styles
+   ============================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--foreground-subtle) transparent;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans, "Inter", system-ui, -apple-system, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =============================================
+   Utility Classes
+   ============================================= */
+
+.card {
+  background: var(--background-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+/* =============================================
+   Animations
+   ============================================= */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.2s ease-out;
+}
+
+.animate-overlay {
+  animation: overlayFadeIn 0.2s ease-out;
+}
+
+/* =============================================
+   Focus & Selection
+   ============================================= */
+
+::selection {
+  background: rgba(6, 7, 113, 0.2);
+  color: inherit;
+}
+
+.dark ::selection {
+  background: rgba(123, 140, 255, 0.3);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }

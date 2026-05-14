@@ -1,65 +1,255 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Zap,
+  Settings,
+  Focus,
+  ClipboardList,
+  BarChart3,
+  LogOut,
+} from "lucide-react";
+import { useTaskStore } from "@/store/useTaskStore";
+import { usePomodoroStore } from "@/store/usePomodoroStore";
+import TaskModal, { type TaskFormData } from "@/components/TaskModal";
+import TaskList from "@/components/TaskList";
+import ThemeToggle from "@/components/ThemeToggle";
+import PomodoroEngine from "@/components/PomodoroEngine";
+import PomodoroWidget from "@/components/PomodoroWidget";
+import PomodoroSettingsModal from "@/components/PomodoroSettingsModal";
+import NotificationEngine from "@/components/NotificationEngine";
+import TodayFocus from "@/components/TodayFocus";
+import StatsView from "@/components/StatsView";
+import LoginPage from "@/components/LoginPage";
+import { useAuth } from "@/components/AuthProvider";
+import type { Task } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+type Tab = "focus" | "tasks" | "stats";
+
+const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
+  { key: "focus", label: "Fokus", icon: <Focus className="w-4 h-4" /> },
+  { key: "tasks", label: "Tugas", icon: <ClipboardList className="w-4 h-4" /> },
+  { key: "stats", label: "Statistik", icon: <BarChart3 className="w-4 h-4" /> },
+];
 
 export default function Home() {
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { tasks, addTask, updateTask, fetchTasks, setUserId, fetchUserSettings, loading: tasksLoading } =
+    useTaskStore();
+  const pomodoroStore = usePomodoroStore();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("focus");
+
+  // Fetch tasks when user logs in
+  useEffect(() => {
+    if (user) {
+      setUserId(user.id);
+      pomodoroStore.setUserId(user.id);
+      fetchTasks();
+      fetchUserSettings();
+      pomodoroStore.fetchSettings(user.id);
+    }
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Show loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex items-center gap-3">
+          <Zap className="w-8 h-8 text-brand-orange animate-pulse" />
+          <span className="text-lg text-foreground-muted">Memuat...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login if not authenticated
+  if (!user) {
+    return <LoginPage />;
+  }
+
+  const handleOpenCreate = () => {
+    setEditingTask(null);
+    setModalOpen(true);
+  };
+
+  const handleOpenEdit = (task: Task) => {
+    setEditingTask(task);
+    setModalOpen(true);
+  };
+
+  const handleSubmit = (data: TaskFormData) => {
+    if (editingTask) {
+      updateTask(editingTask.id, {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        priority: data.priority,
+        deadline: data.deadline ? new Date(data.deadline).toISOString() : null,
+        notes: data.notes,
+        pomodoroEstimate: data.pomodoroEstimate,
+        pomodoroMinutes: data.pomodoroMinutes,
+      });
+    } else {
+      addTask({
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        priority: data.priority,
+        status: "todo",
+        subtasks: [],
+        notes: data.notes,
+        deadline: data.deadline ? new Date(data.deadline).toISOString() : null,
+        pomodoroEstimate: data.pomodoroEstimate,
+        pomodoroMinutes: data.pomodoroMinutes,
+      });
+    }
+  };
+
+  const todoCount = tasks.filter((t) => t.status === "todo").length;
+  const progressCount = tasks.filter((t) => t.status === "in-progress").length;
+  const doneCount = tasks.filter((t) => t.status === "done").length;
+
+  // User avatar from Google
+  const avatarUrl = user.user_metadata?.avatar_url;
+  const displayName = user.user_metadata?.full_name || user.email;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      {/* Global engines (invisible) */}
+      <PomodoroEngine />
+      <NotificationEngine />
+
+      <main className="min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-sm">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Zap className="w-6 h-6 text-brand-orange" />
+              <h1 className="text-xl font-bold text-foreground tracking-tight">
+                FocusFlow
+              </h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="p-2 rounded-lg border border-border bg-background-secondary hover:border-border-hover transition-colors cursor-pointer"
+                title="Pengaturan Pomodoro"
+              >
+                <Settings className="w-4 h-4 text-foreground-muted" />
+              </button>
+              <ThemeToggle />
+              <button
+                onClick={handleOpenCreate}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-hover transition-colors cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                Tambah
+              </button>
+
+              {/* User avatar + logout */}
+              <div className="flex items-center gap-1.5 pl-2 border-l border-border">
+                {avatarUrl && (
+                  <img
+                    src={avatarUrl}
+                    alt={displayName || "User"}
+                    className="w-7 h-7 rounded-full"
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+                <button
+                  onClick={signOut}
+                  className="p-2 rounded-lg hover:bg-background-tertiary transition-colors cursor-pointer"
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4 text-foreground-muted" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Tab navigation + Stats */}
+        <div className="border-b border-border bg-background-secondary">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                {TABS.map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer",
+                      activeTab === tab.key
+                        ? "border-accent text-accent"
+                        : "border-transparent text-foreground-muted hover:text-foreground"
+                    )}
+                  >
+                    {tab.icon}
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <div className="hidden sm:flex items-center gap-4">
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--color-todo)" }} />
+                  <span className="text-foreground-muted">{todoCount}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--color-progress)" }} />
+                  <span className="text-foreground-muted">{progressCount}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--color-done)" }} />
+                  <span className="text-foreground-muted">{doneCount}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div
+          className={cn(
+            "flex-1 mx-auto w-full px-4 py-6",
+            activeTab === "tasks" ? "max-w-5xl" : "max-w-4xl"
+          )}
+        >
+          {tasksLoading ? (
+            <div className="text-center py-16">
+              <Zap className="w-8 h-8 text-brand-orange animate-pulse mx-auto mb-2" />
+              <p className="text-sm text-foreground-muted">Memuat tugas...</p>
+            </div>
+          ) : (
+            <>
+              {activeTab === "focus" && <TodayFocus onEdit={handleOpenEdit} />}
+              {activeTab === "tasks" && (
+                <TaskList tasks={tasks} onEdit={handleOpenEdit} />
+              )}
+              {activeTab === "stats" && <StatsView />}
+            </>
+          )}
+        </div>
+
+        {/* Floating Pomodoro Widget */}
+        <PomodoroWidget />
+
+        {/* Modals */}
+        <TaskModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleSubmit}
+          initialData={editingTask}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        <PomodoroSettingsModal
+          isOpen={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+        />
       </main>
-    </div>
+    </>
   );
 }
