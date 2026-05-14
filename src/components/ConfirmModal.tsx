@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { AlertTriangle, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface ConfirmModalProps {
   isOpen: boolean;

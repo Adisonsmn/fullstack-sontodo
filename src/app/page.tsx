@@ -157,6 +157,7 @@ export default function Home() {
               {/* User avatar + logout */}
               <div className="flex items-center gap-1.5 pl-2 border-l border-border">
                 {avatarUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={avatarUrl}
                     alt={displayName || "User"}

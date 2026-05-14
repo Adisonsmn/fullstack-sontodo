@@ -20,7 +20,6 @@ export default function TodayFocus({ onEdit }: TodayFocusProps) {
   const { startTimer, activeTaskId } = usePomodoroStore();
 
   const todayTasks = useMemo(() => {
-    const now = new Date();
     return tasks
       .filter((t) => {
         if (t.status === "done") return false;

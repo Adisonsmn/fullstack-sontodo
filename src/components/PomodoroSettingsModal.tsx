@@ -18,6 +18,7 @@ export default function PomodoroSettingsModal({
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm(settings);
     }
   }, [isOpen, settings]);
