@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import {
   Plus,
-  Zap,
   Settings,
   Focus,
   ClipboardList,
@@ -60,7 +59,9 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex items-center gap-3">
-          <Zap className="w-8 h-8 text-brand-orange animate-pulse" />
+          <div className="w-8 h-8 rounded-xl bg-brand-orange text-white flex items-center justify-center font-bold text-base tracking-tighter animate-pulse shadow-md shadow-brand-orange/20">
+            FF
+          </div>
           <span className="text-lg text-foreground-muted">Memuat...</span>
         </div>
       </div>
@@ -129,7 +130,9 @@ export default function Home() {
         <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-sm">
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Zap className="w-6 h-6 text-brand-orange" />
+              <div className="w-7 h-7 rounded-lg bg-brand-orange text-white flex items-center justify-center font-bold text-sm tracking-tighter shadow-sm shadow-brand-orange/20">
+                FF
+              </div>
               <h1 className="text-xl font-bold text-foreground tracking-tight">
                 FocusFlow
               </h1>
@@ -221,7 +224,9 @@ export default function Home() {
         >
           {tasksLoading ? (
             <div className="text-center py-16">
-              <Zap className="w-8 h-8 text-brand-orange animate-pulse mx-auto mb-2" />
+              <div className="w-8 h-8 rounded-xl bg-brand-orange text-white flex items-center justify-center font-bold text-base tracking-tighter animate-pulse shadow-md shadow-brand-orange/20 mx-auto mb-3">
+                FF
+              </div>
               <p className="text-sm text-foreground-muted">Memuat tugas...</p>
             </div>
           ) : (

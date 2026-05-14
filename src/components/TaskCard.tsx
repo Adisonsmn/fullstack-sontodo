@@ -25,6 +25,7 @@ import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow, isPast } from "date-fns";
 import { id as idLocale } from "date-fns/locale/id";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface TaskCardProps {
   task: Task;
@@ -34,6 +35,7 @@ interface TaskCardProps {
 export default function TaskCard({ task, onEdit }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [newSubTask, setNewSubTask] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
   const { deleteTask, updateTask, addSubTask, toggleSubTask, deleteSubTask } =
     useTaskStore();
   const { startTimer, activeTaskId } = usePomodoroStore();
@@ -62,9 +64,11 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
   };
 
   const handleDelete = () => {
-    if (window.confirm(`Hapus tugas "${task.title}"?`)) {
-      deleteTask(task.id);
-    }
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    deleteTask(task.id);
   };
 
   // Extract URLs from notes for quick-link display
@@ -375,6 +379,16 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={confirmDelete}
+        title="Hapus Tugas"
+        message={`Apakah Anda yakin ingin menghapus tugas "${task.title}"? Semua data waktu fokus dan subtask di dalamnya akan ikut terhapus permanen.`}
+        confirmText="Ya, Hapus"
+      />
     </div>
   );
 }

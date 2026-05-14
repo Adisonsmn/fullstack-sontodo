@@ -1,6 +1,5 @@
 "use client";
 
-import { Zap } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -12,14 +11,16 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-8 text-center">
         {/* Logo */}
         <div className="space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Zap className="w-10 h-10 text-brand-orange" />
+          <div className="flex items-center justify-center gap-2.5">
+            <div className="w-10 h-10 rounded-xl bg-brand-orange text-white flex items-center justify-center font-bold text-xl tracking-tighter shadow-md shadow-brand-orange/20">
+              FF
+            </div>
             <h1 className="text-3xl font-bold text-foreground tracking-tight">
               FocusFlow
             </h1>
           </div>
           <p className="text-foreground-muted text-sm">
-            Productivity Todo & Pomodoro Timer
+            Productivity Todo & Pomodoro Timer by Adisonsmn
           </p>
         </div>
 
